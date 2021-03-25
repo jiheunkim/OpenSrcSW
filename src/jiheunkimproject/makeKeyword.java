@@ -33,7 +33,6 @@ public class makeKeyword {
 	        
 	        // 루트의 자식 노드 취득
 	        Element root = document.getDocumentElement();
-	        System.out.println("Root : " + root.getTagName());
 	        // 각노드의 리스트 취득
 	        NodeList list = root.getElementsByTagName("doc");
 	        for (int i = 0; i < list.getLength(); i++) {
@@ -57,7 +56,7 @@ public class makeKeyword {
 	    			Keyword kwrd = kl.get(k);
 	    			elebody.appendChild(document.createTextNode(kwrd.getString() + ":" + kwrd.getCnt() + "#"));
 	    			element.appendChild(elebody);
-	    			System.out.print(kwrd.getString() + ":" + kwrd.getCnt() + "#");
+//	    			System.out.print(kwrd.getString() + ":" + kwrd.getCnt() + "#");
 	    		}
 	        }
 	        
