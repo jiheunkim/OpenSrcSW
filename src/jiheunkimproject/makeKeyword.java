@@ -37,24 +37,26 @@ public class makeKeyword {
 	        // 각노드의 리스트 취득
 	        NodeList list = root.getElementsByTagName("doc");
 	        for (int i = 0; i < list.getLength(); i++) {
-	            Element element = (Element) list.item(i);
-	            // doc 태그의 id취득
-	            String id = element.getAttribute("id");         
-	            NodeList titleList = element.getElementsByTagName("title");
-//	            NodeList bodyList = element.getElementsByTagName("body");
+	            Element element = (Element) list.item(i);       
+	            NodeList bodyList = element.getElementsByTagName("body");
 	            String body = getChildren(element, "body");   
 	            
-	            Element bodyList = document.createElement("body");
+	            for(int j=0;j<bodyList.getLength();j++) {
+	            	element.removeChild(bodyList.item(j));
+	            }
+	            
+	            Element elebody = document.createElement("body");
 	            
 	            // init KeywordExtractor
 	    		KeywordExtractor ke = new KeywordExtractor();
 	    		// extract keywords
 	    		KeywordList kl = ke.extractKeyword(body, true);
+	    		
 	    		// print result
-	    		for(int j=0;j<kl.size();j++) {
-	    			Keyword kwrd = kl.get(j);
-	    			bodyList.appendChild(document.createTextNode(kwrd.getString() + ":" + kwrd.getCnt() + "#"));
-	    			element.appendChild(bodyList);
+	    		for(int k=0;k<kl.size();k++) {
+	    			Keyword kwrd = kl.get(k);
+	    			elebody.appendChild(document.createTextNode(kwrd.getString() + ":" + kwrd.getCnt() + "#"));
+	    			element.appendChild(elebody);
 	    			System.out.print(kwrd.getString() + ":" + kwrd.getCnt() + "#");
 	    		}
 	        }
@@ -66,14 +68,13 @@ public class makeKeyword {
 		    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 		               
 		    DOMSource source =new DOMSource(document);
-		    StreamResult result = new StreamResult(new FileOutputStream(new File("src/input.xml")));
+		    StreamResult result = new StreamResult(new FileOutputStream(new File("src/index.xml")));
 		               
 		    transformer.transform(source, result);
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
 	}
-
 
 	public static String getChildren(Element element, String tagName) {
 		NodeList list = element.getElementsByTagName(tagName);
