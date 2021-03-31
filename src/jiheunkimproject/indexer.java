@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -39,77 +40,72 @@ public class indexer {
         HashMap foodMap = new HashMap();
         
         String[][] key = new String[N][];
-        int[][] tf = new int[N][];    
+        int[][] tf = new int[N][];
+        String[] allbody;
         
+        //단어와 횟수 배열 저장
         for(int i=0;i<N;i++) {
         	Element element = (Element) list.item(i);       
             String body = getChildren(element, "body");
-            key[i] = body.split("#");
+            allbody = body.split(":|#");
+            key[i] = new String[allbody.length/2];
+            tf[i] = new int[allbody.length/2];
+            for(int j=0;j<allbody.length/2;j++) {
+            	key[i][j] = allbody[2*j];
+            	tf[i][j] = Integer.parseInt(allbody[2*j+1]);
+            }
         }
         
-        for(int i=0;i<key.length;i++) {
-        	for(int j=0;j<key[i].length;j++) {		
-        		String[] totallist = key[i][j].split(":");
-        		String finalkey = totallist[0];
-        		int tfnum = Integer.valueOf(totallist[1]);
-        		int df = calculatedf(finalkey, key);
-        		double origin = tfnum*Math.log(N/df);
-        		double weight = (Math.round(origin*100)/100.0);
-        		makeHashmap(finalkey,weight,i,foodMap);
-        		System.out.println(finalkey+" -> "+ weight + " -> " + foodMap.get(finalkey));
+        //중복 제거
+        int count = 0;
+        ArrayList<String> keyword = new ArrayList<String>();
+        keyword.add(key[0][0]);
+        
+        for(int i=0;i<N;i++) {
+        	for(int j=0;j<key[i].length;j++) {
+        		for(String Key : keyword) {
+        			if(Key.equals(key[i][j])) {
+        				count++;
+        			}
+        		}
+        		if(count==0) {
+        			keyword.add(key[i][j]);
+        		}else {
+        			count=0;
+        		}
         	}
         }
+
+        int kwsize = keyword.size();
+        int[] cnt = new int[kwsize];
+        for(int i=0;i<kwsize;i++) {
+        	cnt[i]=0;
+        }
         
-		FileOutputStream fileoutStream = new FileOutputStream("src/index.post");
-		ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileoutStream);
-		objectOutputStream.writeObject(foodMap);
-		objectOutputStream.close();
-		
-		//Hashmap 객체 출력
-		FileInputStream fileinStream = new FileInputStream("src/index.post");
-		ObjectInputStream objectInputStream = new ObjectInputStream(fileinStream);
-		
-		Object object = objectInputStream.readObject();
-		objectInputStream.close();
-		
-		HashMap hashMap = (HashMap) object;
-		Iterator<String> it = hashMap.keySet().iterator();
-		
-		while(it.hasNext()) {
-			String Key = it.next();
-			System.out.println(Key + " -> " + foodMap.get(Key));
-		}
-	}
+        for(int i=0;i<N;i++) {
+        	for(int j=0;j<key[i].length;j++) {
+        		for(int k=0;k<kwsize;k++) {
+        			if(keyword.get(k).equals(key[i][j])) {
+        				cnt[k]++;
+        			}
+        		}
+        	}
+        }
 
-	private void makeHashmap(String key, double weight, int i, HashMap<String, ArrayList<Object>> foodMap) throws IOException {
-		if(foodMap.containsKey(key)) {
-			ArrayList<Object> value = (ArrayList<Object>) foodMap.get(key);
-			value.add(i);
-			value.add(weight);
-			foodMap.put(key, value);
-		}else {
-			ArrayList<Object> value = new ArrayList<Object>();
-			value.add(i);
-			value.add(weight);
-			foodMap.put(key, value);
-		}
-	}
-
-	private int calculatedf(String key, String[][] bodystr) {
-		int df = 0;
-		for(int i=0;i<bodystr.length;i++) {
-			boolean condition = false;
-			for(int j=0;j<bodystr[i].length;j++) {
-				String checkstr = bodystr[i][j];
-				if(checkstr.contains(key)) {
-					condition = true;
-				}
-			}
-			if(condition==true) {
-				df++;
-			}
-		}
-		return df;
+        for(int i=0;i<kwsize;i++) {
+        	ArrayList<Object> value = new ArrayList<Object>();
+        	for(int j=0;j<N;j++) {
+        		for(int k=0;k<key[j].length;k++) {
+        			if(keyword.get(i).equals(key[j][k])) {
+        				value.add(j);
+        				float weight = (float)(Math.round((tf[j][k]*Math.log((float)N/(float)cnt[i]))*100.0)/100.0);
+        				value.add(weight);
+        			}
+        		}
+        	}
+        	foodMap.put(keyword.get(i), value);
+        	System.out.println(keyword.get(i)+" -> " + foodMap.get(keyword.get(i)));
+        }
 	}
 
 	private String getChildren(Element element, String tagName) {

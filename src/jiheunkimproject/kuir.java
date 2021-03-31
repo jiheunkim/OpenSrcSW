@@ -16,13 +16,10 @@ public class kuir {
 		}else if("-k".equals(args[0])) {
 			makeKeyword mk = new makeKeyword();
 			mk.kkma(args[1]);
+		}else if("-i".equals(args[0])) {
+			indexer ix = new indexer();
+			ix.makepost(args[1]);
 		}
-		
-//		// doc 초기파일 작성
-//		mc.makeXML("src/data/");
-
-//		// 형태소 작업
-//		mk.kkma("src/collection.xml");
 	}
 
 }
