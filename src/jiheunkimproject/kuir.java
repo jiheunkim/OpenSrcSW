@@ -19,6 +19,11 @@ public class kuir {
 		}else if("-i".equals(args[0])) {
 			indexer ix = new indexer();
 			ix.makepost(args[1]);
+		}else if("-s".equals(args[0])) {
+			searcher sc = new searcher();
+			if("-q".equals(args[2])) {
+				sc.CalcSim(args[1], args[3]);
+			}
 		}
 	}
 
